@@ -10,9 +10,9 @@
         }
 
         :root {
-            --primary-color: #00ff41; /* Bright Green */
+            --primary-color: #00ff41; 
             --primary-hover: #00e038;
-            --bg-color: #0d1117; /* Dark Background */
+            --bg-color: #0d1117; 
             --container-bg: #161b22;
             --text-color: #c9d1d9;
             --border-color: #30363d;
@@ -144,6 +144,23 @@
             font-family: inherit;
             line-height: 1.7;
         }
+        .message-part {
+            margin-bottom: 10px;
+        }
+        .link-part {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 10px;
+        }
+        .link-part .bulk-output-header {
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: none; /* Override border for link header */
+        }
+        .link-part strong {
+            color: var(--primary-color);
+            font-family: inherit;
+            line-height: 1.7;
+        }
         /* Phone-friendly adjustments */
         @media (max-width: 600px) {
             body { padding: 10px; }
@@ -151,12 +168,65 @@
             .options-group { flex-direction: column; gap: 15px; }
         }
     </style>
+    <style>
+        /* To-Do List Styles */
+        #todo-container {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            width: 280px;
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            max-height: calc(100vh - 30px);
+            display: flex;
+            flex-direction: column;
+        }
+        #todo-container h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            text-align: center;
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+        #todo-container input,
+        #todo-container textarea {
+            margin-bottom: 10px;
+        }
+        #todo-container button {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+        }
+        #todoList {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        #todoList li {
+            background: var(--input-bg);
+            border-left: 3px solid var(--primary-color);
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+            font-size: 14px;
+        }
+        #todoList li .todo-name { font-weight: bold; color: var(--text-color); }
+        #todoList li .todo-message { font-size: 0.9em; margin-top: 5px; white-space: pre-wrap; word-wrap: break-word; opacity: 0.8; }
+        #todoList li .todo-day-indicator { position: absolute; top: 10px; right: 30px; font-size: 0.8em; color: var(--primary-color); opacity: 0.7; }
+        .delete-todo-btn { position: absolute; top: 2px; right: 2px; background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 18px; padding: 5px; }
+        .delete-todo-btn:hover { color: #ff8a8a; }
+    </style>
 </head>
 <body>
 
     <div class="container">
         <h2>Auto Chat System</h2>
-        <p>// Choose platform, tone, and mode. Use placeholders: {{name}}, {{date}}, {{emoji}}</p>
+       <!-- <p>// Choose platform, tone, and mode. Use placeholders: {{name}}, {{date}}, {{emoji}}</p> -->
+
 
         <div class="options-group">
             <fieldset>
@@ -172,16 +242,48 @@
             </fieldset>
             <fieldset>
                 <legend>Tone</legend>
-                <label class="radio-label"><input type="radio" name="tone" value="formal" checked> Formal</label>
-                <label class="radio-label"><input type="radio" name="tone" value="informal"> Informal</label>
+                <label class="radio-label"><input type="radio" name="tone" value="formal"> Formal</label>
+                <label class="radio-label"><input type="radio" name="tone" value="informal" checked> Informal</label>
+            </fieldset>
+            <fieldset>
+                <legend>Gender</legend>
+                <label class="radio-label"><input type="radio" name="gender" value="male" checked> Male</label>
+                <label class="radio-label"><input type="radio" name="gender" value="female"> Female</label>
+            </fieldset>
+            <fieldset id="linkDayContainer">
+                <legend>Optional Link</legend>
+                <select id="linkDay" style="background-color: var(--input-bg); color: var(--text-color); border: 1px solid var(--primary-color); padding: 5px;">
+                    <option value="none">None</option>
+                    <option value="1">Link 1</option>
+                    <option value="2">Link 2</option>
+                    <option value="3">Link 3</option>
+                </select>
+            </fieldset>
+            <fieldset id="daySelectorContainer" style="display: none;">
+                <legend>Day</legend>
+                <select id="daySelect" style="background-color: var(--input-bg); color: var(--text-color); border: 1px solid var(--primary-color); padding: 5px;">
+                    <option value="1">Day 1</option>
+                    <option value="2">Day 2</option>
+                    <option value="3">Day 3</option>
+                    <option value="4">Day 4</option>
+                    <option value="5">Day 5</option>
+                    <option value="6">Day 6</option>
+                    <option value="7">Day 7</option>
+                    <option value="8">Day 8</option>
+                    <option value="9">Day 9</option>
+                    <option value="10">Day 10</option>
+                </select>
             </fieldset>
 
-        <label for="template">Message Template:</label>
-        <textarea id="template" rows="8"></textarea>
+        <div id="templateContainer">
+            <label for="template">Message Template:</label>
+            <textarea id="template" rows="8"></textarea>
+        </div>
 
         <div id="singleNameContainer">
             <label for="name">Name:</label>
             <input type="text" id="name" placeholder="Enter the recipient's name">
+
         </div>
         <div id="bulkNameContainer" style="display: none;">
             <label for="bulkNames">Names (one per line):</label>
@@ -195,12 +297,42 @@ Charlie"></textarea>
 
         <label for="emoji">Emoji:</label>
         <input type="text" id="emoji" placeholder="Enter an emoji, e.g., 👋">
-        <button id="generateBtn">Generate Message(s)</button>
-
-        <h3>// Output Log</h3>
+        <button id="generateBtn" style="margin-right: 10px;">Generate Message(s)</button>
+        <button id="addToTodoBtn">Add to To-Do</button>
+        
+        <div class="bulk-output-header" style="margin-top: 20px;">
+            <h3>// Output Log</h3>
+        </div>
         <div id="output">Your generated message will appear here...</div>
     </div>
 
+    <div id="todo-container">
+        <h3>// To-Do List</h3>
+        <div id="todo-form">
+            <input type="text" id="todoName" placeholder="Recipient's Name">
+            <select id="todoDaySelect" style="width: 100%; background-color: var(--input-bg); color: var(--text-color); border: 1px solid var(--primary-color); padding: 12px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box;">
+                <option value="1">Day 1</option>
+                <option value="2">Day 2</option>
+                <option value="3">Day 3</option>
+                <option value="4">Day 4</option>
+                <option value="5">Day 5</option>
+                <option value="6">Day 6</option>
+                <option value="7">Day 7</option>
+                <option value="8">Day 8</option>
+                <option value="9">Day 9</option>
+                <option value="10">Day 10</option>
+            </select>
+            <fieldset style="padding: 5px; margin-bottom: 10px; text-align: center;">
+                <legend style="font-size: 0.9em;">Gender</legend>
+                <label class="radio-label" style="font-size: 0.9em;"><input type="radio" name="todo-gender" value="male" checked> M</label>
+                <label class="radio-label" style="font-size: 0.9em;"><input type="radio" name="todo-gender" value="female"> F</label>
+            </fieldset>
+            <button id="addTodoBtn">Add to List</button>
+        </div>
+        <ul id="todoList">
+            <!-- To-do items will be dynamically inserted here -->
+        </ul>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- DOM Element References ---
@@ -212,19 +344,35 @@ Charlie"></textarea>
             const generateBtn = document.getElementById('generateBtn');
             const outputDiv = document.getElementById('output');
             const platformRadios = document.querySelectorAll('input[name="platform"]');
+            const templateContainer = document.getElementById('templateContainer');
             const toneRadios = document.querySelectorAll('input[name="tone"]');
             const modeRadios = document.querySelectorAll('input[name="mode"]');
+            const genderRadios = document.querySelectorAll('input[name="gender"]');
             const singleNameContainer = document.getElementById('singleNameContainer');
             const bulkNameContainer = document.getElementById('bulkNameContainer');
+            const daySelectorContainer = document.getElementById('daySelectorContainer');
+            const daySelect = document.getElementById('daySelect');
+            const linkDaySelect = document.getElementById('linkDay');
+            // To-Do List Elements
+            const todoDaySelect = document.getElementById('todoDaySelect');
+            const todoNameInput = document.getElementById('todoName');
+            const addTodoBtn = document.getElementById('addTodoBtn');
+            const todoListUl = document.getElementById('todoList');
+            const addToTodoBtn = document.getElementById('addToTodoBtn');
 
-            // --- Templates Object ---
+
+            // --- Content Objects ---
             const templates = {
                 email: {
                     formal: `Dear {{name}},
+Greetings, .
 
 This is a friendly reminder regarding your upcoming appointment scheduled for {{date}}.
 
-We look forward to seeing you. Should you have any questions or need to reschedule, please do not hesitate to contact us at your earliest convenience.
+For more information, you can visit the following link:
+{{link}}
+
+We look forward to seeing you. Should you have any questions, please do not hesitate to contact us.
 
 Best regards,
 The Team`,
@@ -232,27 +380,54 @@ The Team`,
 
 Just a quick heads-up that you have an appointment with us on {{date}}.
 
-See you then! Let us know if anything comes up.
+Here's a link with some more details: {{link}}
+
+See you then, {{salutation}}!
 
 Cheers,
 The Team`
                 },
                 whatsapp: {
-                    formal: `*Dear {{name}},*
+                    formal: `
+Good Morning {{name}} {{salutation}}, Have a wonderful day ahead.....Please connect me if you have any other requirements Happy To Help😊🙏.`,
+                    informal: [
+                        // Day 1
+                        `Good Morning {{name}} {{salutation}},🫡 Aapka din Mangalmoy ho
 
-This is a friendly reminder regarding your upcoming appointment scheduled for *{{date}}*.
+hum logoko hotels & Cab book kar lena chahiye with us or others, Nehin toh acha rooms aur Driver milna muskil ho jayega😔
 
-We look forward to seeing you. If you have any questions or need to reschedule, please contact us.
+kyunki bahot rush hain January mahina mein ALMOST 80 % ROOMS IN GOOD HOTELS ARE BOOKED......😊🙏 `,
+                        // Day 2
+`{{link}}
+We’re featured in the renowned Hindustan Times and Ahmedabad Mirror. {{name}} {{salutation}}, requesting you to kindly freeze the cab booking now 🙏
+Season is super tight — late decision = limited options 🙏🏻`,
+                        // Day 3
+                        ` {{link}} Good Morning {{name}} {{salutation}}....Happy to share our recent reviews from our honorable guests \n
 
-Thank you,
-The Team`,
-                    informal: `Hey {{name}}! {{emoji}}
-
-Just a reminder about your appointment on *{{date}}*.
-
-See you soon! 👋`
+Humlogo ke sath yah kisi aur.....jaldi Book kijiye...Nehin toh acha rooms & Hotel milna muskil ho ja raha hai😊🙏 `,
+                        // Day 4
+                        `Good morning {{name}} {{salutation}}! Just a friendly check-in. *{{date}}*`,
+                        // Day 5
+                        `Good morning {{name}} {{salutation}}! TGIF! Wishing you a fantastic Friday. {{emoji}} *{{date}}*`,
+                        // Day 6
+                        `Good morning {{name}} {{salutation}}, hope you're enjoying your weekend. *{{date}}*`,
+                        // Day 7
+                        `Good morning {{name}} {{salutation}}, enjoy the rest of your Sunday! *{{date}}*`,
+                        // Day 8
+                        `Good morning {{name}} {{salutation}}! New week, new goals. Let's do this! {{emoji}} *{{date}}*`,
+                        // Day 9
+                        `Good morning {{name}} {{salutation}}! Just another friendly message coming your way. *{{date}}*`,
+                        // Day 10
+                        `Good morning {{name}}! Hope everything is going well on your end. *{{date}}*`
+                    ]
                 }
             };
+
+            const links = {
+                '1': '',
+                '2': 'https://www.ahmedabadmirror.com/remarkable-journeys-businesses-driving-success-today/81869962.html#goog_rewarded',
+                '3': 'https://youtube.com/@helpthetourists'
+            }
 
             // --- Functions ---
 
@@ -262,11 +437,11 @@ See you soon! 👋`
                 if (mode === 'single') {
                     singleNameContainer.style.display = 'block';
                     bulkNameContainer.style.display = 'none';
-                    generateBtn.textContent = 'Generate & Copy';
+                    generateBtn.textContent = 'Generate Message(s)';
                 } else {
                     singleNameContainer.style.display = 'none';
                     bulkNameContainer.style.display = 'block';
-                    generateBtn.textContent = 'Generate Bulk';
+                    generateBtn.textContent = 'Generate Message(s)';
                 }
                 outputDiv.innerHTML = 'Your generated message(s) will appear here...'; // Clear output on mode change
             }
@@ -275,12 +450,40 @@ See you soon! 👋`
             function updateTemplate() {
                 const platform = document.querySelector('input[name="platform"]:checked').value;
                 const tone = document.querySelector('input[name="tone"]:checked').value;
-                templateTextarea.value = templates[platform][tone];
+                
+                if (platform === 'whatsapp') {
+                    daySelectorContainer.style.display = 'block';
+                    const day = daySelect.value;
+                    const platformTemplates = templates[platform];
+
+                    if (tone === 'informal' && Array.isArray(platformTemplates.informal)) {
+                        let message = platformTemplates.informal[day - 1] || platformTemplates.informal[0];
+                        templateTextarea.value = message.replace(/{{day}}/g, day);
+                    } else if (platformTemplates[tone]) {
+                        templateTextarea.value = platformTemplates[tone].replace(/{{day}}/g, day);
+                    } else {
+                        // Fallback to the first available template for the platform
+                        templateTextarea.value = Object.values(platformTemplates)[0];
+                    }
+                } else {
+                    daySelectorContainer.style.display = 'none';
+                    templateContainer.style.display = 'block';
+                    templateTextarea.value = templates[platform][tone];
+                }
+
+                // Show link selector only if the template contains the {{link}} placeholder
+                if (templateTextarea.value.includes('{{link}}')) {
+                    document.getElementById('linkDayContainer').style.display = 'block';
+                } else {
+                    document.getElementById('linkDayContainer').style.display = 'none';
+                }
+
             }
             
             // Generates message(s) based on the current mode
             function generateMessage() {
                 const mode = document.querySelector('input[name="mode"]:checked').value;
+
                 if (mode === 'single') {
                     generateSingleMessage();
                 } else {
@@ -296,16 +499,50 @@ See you soon! 👋`
                 const emoji = emojiInput.value;
 
                 if (!name) {
-                    outputDiv.innerHTML = '>> ERROR: Name field is required.';
-                    outputDiv.style.color = 'red';
+                    outputDiv.textContent = '>> ERROR: Name field is required.';
                     return;
                 }
-                outputDiv.style.color = 'var(--dark-gray)'; // Reset color on success
 
-                const generatedMessage = generateIndividualMessage(template, name, date, emoji);
-                outputDiv.textContent = generatedMessage;
+                const salutation = getSalutation();
+                const link = getLink();
+                const messageWithoutLink = generateIndividualMessage(template, name, date, emoji, salutation, '');
+                const fullMessage = generateIndividualMessage(template, name, date, emoji, salutation, link);
 
-                navigator.clipboard.writeText(generatedMessage).then(() => {
+                if (link && template.includes('{{link}}')) {
+                    outputDiv.innerHTML = `
+                        <div class="message-section">
+                            <div class="bulk-output-header" style="margin-bottom: 5px;">
+                                <strong>// MESSAGE</strong>
+                                <button class="copy-individual-btn copy-message-btn">COPY MESSAGE</button>
+                            </div>
+                            <pre class="message-part" style="white-space: pre-wrap; font-family: inherit; color: var(--text-color);">${messageWithoutLink}</pre>
+                        </div>
+                        <div class="link-part" style="padding-top: 15px;">
+                             <div class="bulk-output-header" style="margin-bottom: 5px;">
+                                <strong>// LINK</strong>
+                                <button class="copy-individual-btn copy-link-btn">COPY LINK</button>
+                            </div>
+                            <pre style="white-space: pre-wrap; font-family: inherit; color: var(--text-color);">${link}</pre>
+                        </div>`;
+
+                    outputDiv.querySelector('.copy-message-btn').addEventListener('click', (e) => {
+                        navigator.clipboard.writeText(messageWithoutLink);
+                        e.target.textContent = 'Copied!';
+                        setTimeout(() => { e.target.textContent = 'COPY MESSAGE'; }, 2000);
+                    });
+
+                    // Add event listener for the new copy link button
+                    outputDiv.querySelector('.copy-link-btn').addEventListener('click', (e) => {
+                        navigator.clipboard.writeText(link);
+                        e.target.textContent = 'Copied!';
+                        setTimeout(() => { e.target.textContent = 'COPY LINK'; }, 2000);
+                    });
+                } else {
+                    outputDiv.textContent = fullMessage;
+                }
+
+                // Copy the generated message to the clipboard
+                navigator.clipboard.writeText(fullMessage).then(() => {
                     const originalButtonText = generateBtn.textContent;
                     generateBtn.textContent = 'Copied!';
                     setTimeout(() => {
@@ -313,6 +550,7 @@ See you soon! 👋`
                     }, 2000);
                 }).catch(err => {
                     console.error('Failed to copy text: ', err);
+                    outputDiv.textContent += "\n\n>> INFO: Could not automatically copy text.";
                 });
             }
 
@@ -320,11 +558,9 @@ See you soon! 👋`
             function generateBulkMessages() {
                 const names = bulkNameInput.value.split('\n').filter(name => name.trim() !== '');
                 if (names.length === 0) {
-                    outputDiv.innerHTML = '>> ERROR: Bulk names field is empty.';
-                    outputDiv.style.color = 'red';
+                    outputDiv.textContent = '>> ERROR: Bulk names field is empty.';
                     return;
                 }
-                outputDiv.style.color = 'var(--dark-gray)';
                 outputDiv.innerHTML = ''; // Clear previous results
 
                 names.forEach(name => {
@@ -332,33 +568,186 @@ See you soon! 👋`
                     const template = templateTextarea.value;
                     const date = dateInput.value;
                     const emoji = emojiInput.value;
-                    const message = generateIndividualMessage(template, name, date, emoji);
+                    const salutation = getSalutation();
+                    const link = getLink();
+                    const message = generateIndividualMessage(template, name, date, emoji, salutation, link);
+
+                    let messageContent = `<pre class="message-part" style="white-space: pre-wrap; font-family: inherit; color: var(--text-color);">${message}</pre>`;
+
+                    if (link && template.includes('{{link}}')) {
+                        messageContent = `
+                            <pre class="message-part" style="white-space: pre-wrap; font-family: inherit; color: var(--text-color);">${generateIndividualMessage(template, name, date, emoji, salutation, '')}</pre>
+                            <div class="link-part" style="padding-top: 15px;">
+                                <div class="bulk-output-header" style="margin-bottom: 5px;">
+                                    <strong>// LINK</strong>
+                                    <button class="copy-individual-btn copy-link-btn">COPY LINK</button>
+                                </div>
+                                <pre style="white-space: pre-wrap; font-family: inherit; color: var(--text-color);">${link}</pre>
+                            </div>
+                        `;
+                    }
 
                     const block = document.createElement('div');
                     block.className = 'bulk-output-block';
                     block.innerHTML = `
                         <div class="bulk-output-header">
-                            <strong>// MSG FOR: ${name}</strong>
-                            <button class="copy-individual-btn">COPY</button>
+                            <strong>// MSG FOR: ${name.trim()}</strong>
+                            <button class="copy-individual-btn copy-message-btn">COPY</button>
                         </div>
-                        <pre style="white-space: pre-wrap; font-family: inherit; color: var(--text-color);">${message}</pre>
+                        ${messageContent}
                     `;
                     outputDiv.appendChild(block);
 
-                    block.querySelector('.copy-individual-btn').addEventListener('click', (e) => {
+                    block.querySelector('.copy-message-btn').addEventListener('click', (e) => {
                         navigator.clipboard.writeText(message);
                         e.target.textContent = 'Copied!';
                         setTimeout(() => { e.target.textContent = 'Copy'; }, 2000);
                     });
+
+                    const copyLinkBtn = block.querySelector('.copy-link-btn');
+                    if (copyLinkBtn) {
+                        copyLinkBtn.addEventListener('click', (e) => {
+                            navigator.clipboard.writeText(link);
+                            e.target.textContent = 'Copied!';
+                            setTimeout(() => { e.target.textContent = 'COPY LINK'; }, 2000);
+                        });
+                    }
                 });
             }
 
             // Helper function to create a single message from a template
-            function generateIndividualMessage(template, name, date, emoji) {
-                let generatedMessage = template.replace(/{{name}}/g, name.trim());
-                generatedMessage = generatedMessage.replace(/{{emoji}}/g, emoji || '😊');
-                generatedMessage = generatedMessage.replace(/{{date}}/g, date || ''); // Replace with empty string if no date
+            function generateIndividualMessage(template, name, date, emoji, salutation, link) {
+                let generatedMessage = template.replace(/{{name}}/g, name.trim())
+                                               .replace(/{{salutation}}/g, salutation)
+                                               .replace(/{{emoji}}/g, emoji || '😊')
+                                               .replace(/{{date}}/g, date || '') // Replace with empty string if no date
+                                               .replace(/{{link}}/g, link);
                 return generatedMessage;
+            }
+
+            // Gets the correct salutation based on gender
+            function getSalutation() {
+                const gender = document.querySelector('input[name="gender"]:checked').value;
+                return gender === 'male' ? 'Sir' : 'Ma\'am';
+            }
+
+            // Gets the selected link
+            function getLink() {
+                const linkDay = linkDaySelect.value;
+                return links[linkDay] || ''; // Return the link or an empty string if 'none'
+            }
+
+            // --- To-Do List Functions ---
+            let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+            function saveTodos() {
+                localStorage.setItem('todos', JSON.stringify(todos));
+            }
+
+            function renderTodos() {
+                todoListUl.innerHTML = '';
+                if (todos.length === 0) {
+                    todoListUl.innerHTML = '<li style="text-align: center; opacity: 0.5; border-left: none;">Your list is empty.</li>';
+                    return;
+                }
+                todos.forEach((todo, index) => {
+                    const li = document.createElement('li');
+                    li.dataset.index = index; // Add index to the li element
+                    li.innerHTML = `
+                        <div class="todo-name">${todo.name}</div>
+                        <div class="todo-message">${todo.message}</div>
+                        <button class="delete-todo-btn" data-index="${index}">&times;</button>
+                    `;
+                    todoListUl.appendChild(li);
+                });
+            }
+
+            function addTodo() {
+                const name = todoNameInput.value.trim();
+                const day = todoDaySelect.value;
+                const platform = document.querySelector('input[name="platform"]:checked').value;
+                const tone = document.querySelector('input[name="tone"]:checked').value;
+                const gender = document.querySelector('input[name="todo-gender"]:checked').value;
+
+                let message = '';
+                const platformTemplates = templates[platform];
+
+                if (platform === 'whatsapp' && tone === 'informal' && Array.isArray(platformTemplates.informal)) {
+                    // Handle WhatsApp informal array
+                    message = platformTemplates.informal[day - 1] || platformTemplates.informal[0];
+                } else if (platformTemplates && platformTemplates[tone]) {
+                    // Handle Email and WhatsApp formal
+                    message = platformTemplates[tone];
+                } else {
+                    // Fallback
+                    alert('Could not find a matching template for the current settings.');
+                    return;
+                }
+
+                if (name && message) {
+                    todos.push({ name, message, gender });
+                    todoNameInput.value = '';
+                    todoDaySelect.value = '1'; // Reset dropdown
+                    saveTodos();
+                    renderTodos();
+                } else {
+                    alert('Please enter both a name and a message for the to-do item.');
+                }
+            }
+
+            function handleTodoListClick(e) {
+                if (e.target.classList.contains('delete-todo-btn')) {
+                    const index = parseInt(e.target.getAttribute('data-index'), 10);
+                    todos.splice(index, 1);
+                    saveTodos();
+                    renderTodos();
+                } else if (e.target.closest('li')) {
+                    // On click, populate the main generator fields
+                    const li = e.target.closest('li');
+                    const index = parseInt(li.dataset.index, 10);
+                    if (isNaN(index)) return; // Exit if no valid index
+
+                    const todo = todos[index];
+                    document.querySelector('input[name="mode"][value="single"]').click();
+                    nameInput.value = todo.name;
+                    templateTextarea.value = todo.message;
+                    document.querySelector(`input[name="gender"][value="${todo.gender}"]`).checked = true;
+                    nameInput.focus();
+                };
+            }
+
+            function addFromMainFormToTodo() {
+                const name = nameInput.value.trim();
+                const mode = document.querySelector('input[name="mode"]:checked').value;
+
+                if (mode !== 'single' || !name) {
+                    alert('Please enter a name in "Single" mode to add to the to-do list.');
+                    return;
+                }
+
+                const gender = document.querySelector('input[name="gender"]:checked').value;
+                const platform = document.querySelector('input[name="platform"]:checked').value;
+                const tone = document.querySelector('input[name="tone"]:checked').value;
+                
+                // Use the day from the appropriate selector
+                const day = (platform === 'whatsapp') ? daySelect.value : todoDaySelect.value;
+
+                let message = '';
+                const platformTemplates = templates[platform];
+
+                if (platform === 'whatsapp' && tone === 'informal' && Array.isArray(platformTemplates.informal)) {
+                    message = platformTemplates.informal[day - 1] || platformTemplates.informal[0];
+                } else if (platformTemplates && platformTemplates[tone]) {
+                    message = platformTemplates[tone];
+                } else {
+                    alert('Could not find a matching template for the current settings.');
+                    return;
+                }
+
+                todos.push({ name, message, gender });
+                saveTodos();
+                renderTodos();
+                alert(`Added "${name}" to the to-do list.`);
             }
 
             // --- Initial Setup and Event Listeners ---
@@ -368,7 +757,15 @@ See you soon! 👋`
             platformRadios.forEach(radio => radio.addEventListener('change', updateTemplate));
             toneRadios.forEach(radio => radio.addEventListener('change', updateTemplate));
             modeRadios.forEach(radio => radio.addEventListener('change', toggleMode));
+            daySelect.addEventListener('change', updateTemplate);
             generateBtn.addEventListener('click', generateMessage);
+
+            // To-Do List Event Listeners
+            addTodoBtn.addEventListener('click', addTodo);
+            todoListUl.addEventListener('click', handleTodoListClick);
+            addToTodoBtn.addEventListener('click', addFromMainFormToTodo);
+            renderTodos(); // Load initial to-do items
+
         });
     </script>
 
